@@ -148,6 +148,12 @@ for itr = 1 : iterNum
         break;
     end
     %%}
+    if (max(sum(X_curr,1)) <= 1 && ...
+            max(sum(X_curr,2)) <= 1 && ...
+            sum(X_curr(:)) == L && ...
+            sum(X_curr(:) ~= 0 & X_curr(:) ~= 1) == 0)
+        break;
+    end
     % fprintf('    obj val = %f\n', obj_GNCCP(itr));
 end
 

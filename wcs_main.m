@@ -19,7 +19,8 @@ L = min(M,N);
 VH = 10 * (rand(N,2) - 0.5);
 
 r_ = randintrlv(1:N,1);
-r_ = sort(r_(1:M));
+r_ = r_(1:M);
+r_ = sort(r_);
 X_true = zeros(M,N);
 for i = 1 : M
     X_true(i,r_(i)) = 1;
@@ -52,7 +53,8 @@ figure;
         axis equal;
 
 %%
-t_arr = 1 : -0.001 : -1;
+t_intvl = 0.001;
+t_arr = 1 : -t_intvl : -1 + t_intvl;
 iterNum = length(t_arr);
 obj_GNCCP = zeros(1,iterNum);
 obj_wcs = zeros(1,iterNum);
@@ -74,15 +76,15 @@ for itr = 1 : iterNum
     % Frank Wolfe Update
     iterNum_fw = 1;
     obj_fw = zeros(1,iterNum_fw);
-    % GRAD_J takes nabla H1(X) implementation
-        G1 = AG2T_PLUS_AG2 * X_curr * ONES_NN;
-        G2 = -2 * (AG' * X_curr * AH + AG * X_curr * AH');
-        XtX = X_curr' * X_curr;
-        G3 = 2 * (X_curr * AH * XtX * AH' + X_curr * AH' * XtX * AH);
-        G = G1 + G2 + G3;
     
     % search vertex points
         for itr_fw = 1 : iterNum_fw
+            % GRAD_J takes nabla H1(X) implementation
+                G1 = AG2T_PLUS_AG2 * X_curr * ONES_NN;
+                G2 = -2 * (AG' * X_curr * AH + AG * X_curr * AH');
+                XtX = X_curr' * X_curr;
+                G3 = 2 * (X_curr * AH * XtX * AH' + X_curr * AH' * XtX * AH);
+                G = G1 + G2 + G3;
             %{
             Y = zeros(M,N);
             for l_ = 1 : L
@@ -130,6 +132,10 @@ for itr = 1 : iterNum
             X_curr = X_curr + l_(argmin) * D ;
             %X_curr = awgn(X_curr,100,'measured') + l_(argmin) * D ;
             obj_fw(itr_fw) = gnccp_obj(X_curr, t, AG, AH);
+            if (argmin == 1)
+                % disp(obj_fw);
+                break;
+            end
         end
     
     obj_GNCCP(itr) = gnccp_obj(X_curr, t, AG, AH); % Jt(X)
